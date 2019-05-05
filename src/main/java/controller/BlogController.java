@@ -13,6 +13,8 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import service.BlogService;
 
+import javax.validation.Valid;
+
 @Controller
 public class BlogController {
 
@@ -28,24 +30,24 @@ public class BlogController {
     }
 
     @GetMapping("/create-blog")
-    public ModelAndView showCreateForm(){
-        ModelAndView modelAndView = new ModelAndView("create");
-        modelAndView.addObject("blog", new Blog());
-        return modelAndView;
+    public String showCreateForm(Model model){
+        model.addAttribute("blog", new Blog());
+        return "create";
     }
 
     @PostMapping("/create-blog")
-    public String createBlog(@ModelAttribute("blog") Blog blog, BindingResult bindingResult
-            , RedirectAttributes redirectAttributes){
+    public String createBlog(@Valid @ModelAttribute("blog") Blog blog, BindingResult bindingResult
+            , Model model){
         new Blog().validate(blog, bindingResult);
         if (bindingResult.hasFieldErrors()){
             return "create";
         }else {
             blogService.save(blog);
-            redirectAttributes.addFlashAttribute("message", "New blog was created successfully!");
+            model.addAttribute("blog", blog);
             return "redirect:/";
         }
     }
+
 
     @RequestMapping(value = "/delete-blog/{id}", method = {RequestMethod.GET, RequestMethod.POST})
     public String deleteBlog(@PathVariable Long id, RedirectAttributes redirectAttributes){
